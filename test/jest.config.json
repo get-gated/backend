@@ -1,0 +1,16 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "resolver": "jest-node-exports-resolver",
+  "moduleNameMapper": {
+    "@app/interfaces/(.*)": "<rootDir>/../src/interfaces/$1",
+    "@app/errors/(.*)": "<rootDir>/../src/errors/$1",
+    "@app/events/(.*)": "<rootDir>/../src/events/$1",
+    "@app/modules/(.*)": "<rootDir>/../src/modules/$1"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@app/interfaces": ["src/interfaces"],
+      "@app/interfaces/*": ["src/interfaces/*"],
+      "@app/errors": ["src/errors"],
+      "@app/errors/*": ["src/errors/*"],
+      "@app/events": ["src/events"],
+      "@app/events/*": ["src/events/*"],
+      "@app/modules": ["src/modules"],
+      "@app/modules/*": ["src/modules/*"]
+    }
+  }
+}

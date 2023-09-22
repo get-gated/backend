@@ -1,0 +1,114 @@
+name: Lint & Test Runner Template
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+      path:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Lint & Unit Tests ${{ inputs.name }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: docker-compose -f ./docker/docker-compose.yaml up -d postgres
+      - name: Wait for postgres
+        run: while ! nc -z localhost 5432; do sleep 0.1; done
+
+      - run: npm ci
+        working-directory: ./
+        name: Install dependencies
+
+      - name: Write .env file
+        run: |
+          touch .env
+          echo DB_HOST=localhost >> .env
+          echo DB_PORT=5432 >> .env
+          echo DB_USERNAME=postgres >> .env
+          echo DB_PASSWORD=test >> .env
+          echo DB_DATABASE=db >> .env
+
+      - run: npx mikro-orm schema:create -r
+        name: Setup database
+
+      - run: npm run db:seed
+        name: Seed Database
+
+      - run: npm run prettier:ci
+        working-directory: ./
+        name: ${{ inputs.name }} Prettier
+
+      - run: npm run lint:ci
+        working-directory: ./
+        name: ${{ inputs.name }} Lint
+
+      - run: npm run test:ci
+        working-directory: ./
+        name: ${{ inputs.name }} Unit Tests
+
+      - run: npm run build
+        working-directory: ./
+        name: Build App
+
+      #E2E Tests
+#      - run: docker-compose -f ./docker/docker-compose.yaml up -d
+#      - name: Wait for postgres
+#        run: while ! nc -z localhost 5432; do sleep 0.1; done
+#      - name: Wait for pubsub
+#        run: while ! nc -z localhost 8538; do sleep 0.1; done
+#      - name: Write .env file
+#        run: |
+#          touch .env
+#          echo PORT=3000 >> .env
+#          echo APP_PUBLIC_PROTOCOL=http >> .env
+#          echo APP_PUBLIC_DOMAIN=localhost:3000 >> .env
+#          echo APP_API_BASE_ROUTE=api >> .env
+#          echo APP_AUTH_ALLOW_CLEAR=true >> .env
+#          echo NODE_ENV=development >> .env
+#          echo LOG_LEVEL=info >> .env
+#          echo LOG_ENV=local >> .env
+#          echo TRACE_EXPORTER=zipkin >> .env
+#          echo REDIS_HOST=localhost >> .env
+#          echo REDIS_PORT=6379 >> .env
+#          echo PUBSUB_EMULATOR_HOST=localhost:8538 >> .env
+#          echo GCLOUD_PROJECT=test >> .env
+#          echo DB_HOST=localhost >> .env
+#          echo DB_PORT=5432 >> .env
+#          echo DB_USERNAME=postgres >> .env
+#          echo DB_PASSWORD=test >> .env
+#          echo DB_SYNC=true >> .env
+#          echo DB_DATABASE=db >> .env
+#          echo NYLAS_CLIENT_ID=cmB0eH1x5t9vXRyDeJh0 >> .env
+#          echo NYLAS_CLIENT_SECRET=vuLtf1nWoLhM8hLh3h3dfSRtf4G0L >> .env
+#          echo GOOGLE_CLIENT_ID=my-client-id.apps.googleusercontent.com >> .env
+#          echo GOOGLE_CLIENT_SECRET=myCL-ient145seCRet >> .env
+#          echo GOOGLE_REDIRECT_URI=http://localhost:3000/api/google/add-connection-callback >> .env
+#          echo PUBSUB_MAX_BACKOFF_SECS=600 >> .env
+#          echo PUBSUB_MIN_BACKOFF_SECS=1 >> .env
+#          echo PUBSUB_MAX_DELIVERY_ATTEMPTS=5 >> .env
+#          echo PUBSUB_DEAD_LETTER_TOPIC_NAME=deadletter >> .env
+#          echo EVENT_BUS_DISABLE_DELIVERY_RETRY=true >> .env
+#          echo NOTIFICATION_SENDGRID_API_KEY=SG.Api.Key >> .env
+#          echo NOTIFICATION_SENDGRID_API_SECRET=SendGridSecret >> .env
+#          echo NOTIFICATION_TX_EMAIL_FROM_ADDRESS=support@gated.com >> .env
+#          echo NOTIFICATION_TX_EMAIL_FROM_NAME=Gated >> .env
+#      - run: npx mikro-orm schema:create -r
+#        name: Setup database
+#      - run: npm run test:e2e
+#        working-directory: ./
+#        name: ${{ inputs.name }} E2E Tests

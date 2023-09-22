@@ -1,0 +1,29 @@
+name: Build Docker image for tag
+
+on:  
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Authenticate Google Cloud Tools
+        uses:  gatedinc/actions-workflows/.github/actions/gcloud-auth@main
+        with:
+          service_account: gha-gated-nestjs@gated-inc-prod.iam.gserviceaccount.com
+          workload_identity_provider: projects/577749527190/locations/global/workloadIdentityPools/automation/providers/github-provider
+          gcloud_project_id: gated-inc-prod
+
+      - name: Build Docker Image
+        uses: gatedinc/actions-workflows/.github/actions/docker-build@main
+        with:
+          registry: us-central1-docker.pkg.dev/gated-inc-prod
+          image_name: docker/api

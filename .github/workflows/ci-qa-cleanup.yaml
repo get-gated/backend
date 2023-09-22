@@ -1,0 +1,21 @@
+name: QA Environment Cleanup
+
+on:
+  pull_request:
+    types: ['closed', 'unlabeled']
+
+jobs:
+  qa-cleanup:
+    if: ${{ (github.event.action == 'unlabeled' && github.event.label.name == 'QA') || contains(github.event.pull_request.labels.*.name, 'QA') }}    
+    uses: gatedinc/actions-workflows/.github/workflows/qa-cleanup.yaml@main
+    with:
+      app_name: api
+      image_alias: gated-api
+      image_tag: sha-${{ github.event.pull_request.head.sha }}
+      service_account: gha-gated-nestjs@gated-inc-prod.iam.gserviceaccount.com
+      workload_identity_provider: projects/577749527190/locations/global/workloadIdentityPools/automation/providers/github-provider
+      gcloud_project_id: gated-inc-prod
+      registry: us-central1-docker.pkg.dev/gated-inc-prod
+      image_name: docker/api
+    secrets:
+      infra_repo_key: ${{ secrets.INFRASTRUCTURE_REPO_KEY }}

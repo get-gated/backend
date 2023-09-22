@@ -1,0 +1,17 @@
+name: Project CI
+
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+    paths-ignore:
+      - docker/**
+      - README.md
+      - .sops.yaml
+      - .github/**
+
+jobs:
+  call-lint-ci-workflow:
+    uses: ./.github/workflows/wf-unit-test.lint.prettier.template.yaml
+    with:
+      path: ./
+      name: Entire Project

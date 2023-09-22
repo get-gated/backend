@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:12
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USERNAME: 'postgres'
+      POSTGRES_PASSWORD: 'test'
+      POSTGRES_DB: db
+    volumes:
+      - ./docker-volumes/data/pg:/var/lib/postgresql/data
+  redis:
+    image: redis:6
+    ports:
+      - '6379:6379'
+  pubsub:
+    image: google/cloud-sdk:latest
+    working_dir: /mnt/data
+    ports:
+      - '8538:8538'
+    command: /bin/bash -c
+      "mkdir -p gcd pubsub && gcloud config set project emulator && gcloud -q beta emulators pubsub start --data-dir /mnt/data/pubsub --host-port 0.0.0.0:8538"
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - '9411:9411'

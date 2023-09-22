@@ -1,0 +1,40 @@
+name: Build Docker image and update defaults
+on:  
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Authenticate Google Cloud Tools
+        uses:  gatedinc/actions-workflows/.github/actions/gcloud-auth@main
+        with:
+          service_account: gha-gated-nestjs@gated-inc-prod.iam.gserviceaccount.com
+          workload_identity_provider: projects/577749527190/locations/global/workloadIdentityPools/automation/providers/github-provider
+          gcloud_project_id: gated-inc-prod
+
+      - name: Build Docker Image
+        uses: gatedinc/actions-workflows/.github/actions/docker-build@main
+        with:
+          registry: us-central1-docker.pkg.dev/gated-inc-prod
+          image_name: docker/api
+    
+  update-default-image:
+    needs: build-and-push-image
+    uses: gatedinc/actions-workflows/.github/workflows/update-defaults.yaml@main
+    with:
+      app_name: api
+      image_alias: gated-api
+      registry: us-central1-docker.pkg.dev/gated-inc-prod
+      image_name: docker/api
+      image_tag: sha-${{ github.sha }}
+    secrets:
+      infra_repo_key: ${{ secrets.INFRASTRUCTURE_REPO_KEY }}
