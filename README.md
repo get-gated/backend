@@ -32,7 +32,7 @@ The following services are required at runtime:
 2. edit the `.env` file and populate values for:
     - `{name}`: use the personal name value used to name the GCP project created for you. i.e. copy `{name}` from `gated-dev-{name}`
     - `{populate}`: various values that include keys from the associated GCP project
-    - refer to the [GCP Product Configuration](https://www.notion.so/gated/env-Variables-ae079cf9f2ab433f83614eab09dbb1c7) document for specific values to set in the `.env` file.
+    - refer to the [GCP Product Configuration](./gcp-setup/README.md) document for specific values to set in the `.env` file.
 
 3. Add `AUTH_ADMIN_DOMAIN` to `.env` and set to the email domain of a test user. For example `AUTH_ADMIN_DOMAIN=gated.com`
     - when signing up with the test account, the account should be assigned as an admin. This is particularly useful for using the admin client.
